@@ -137,6 +137,7 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 // Since the tiers are sorted, the given quantity is below
                 // the quantity value of the remaining tiers and we can exit.
+                // see: CatalogServiceImpl.insertPriceTier
                 break;
             }
         }

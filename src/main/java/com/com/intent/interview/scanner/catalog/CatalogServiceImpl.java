@@ -87,6 +87,9 @@ public class CatalogServiceImpl implements CatalogService {
                             priceTier.getQuantity(), productCode));
         }
         product.getPriceTiers().add(priceTier);
+
+        // Re-sort by quantity.
+        product.getPriceTiers().sort((a, b) -> a.getQuantity().compareTo(b.getQuantity()));
     }
 
     /**
