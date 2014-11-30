@@ -1,0 +1,77 @@
+<project name="price-scanner" default="dist" basedir=".">
+    <description>
+        Interview Test - A Price Scanner Application
+    </description>
+    <!-- set global properties for this build -->
+    <property name="ant.project.name" value="price-scanner"/>
+    <property name="jarname"  value="${ant.project.name}"/>
+    <!-- set directories -->
+    <property name="src.dir" location="src"/>
+    <property name="test.dir" location="src/test/java"/>
+    <property name="build.dir" location="build"/>
+    <property name="dist.dir"  location="dist"/>
+    <property name="lib.dir"  location="lib"/>
+    <property name="test.report.dir" location="testreport" />
+
+    <path id="project.classpath">
+        <pathelement location="${build.dir}" />
+        <pathelement location="${lib.dir}" />
+        <pathelement location="${lib.dir}/junit-4.11.jar" />
+        <pathelement location="${lib.dir}/hamcrest-core-1.3.jar"/>
+    </path>
+
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create directories if needed -->
+        <mkdir dir="${src.dir}"/>
+        <mkdir dir="${test.dir}"/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="init" description="compile the source " >
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac debug="true"
+               srcdir="${src.dir}"
+               destdir="${build.dir}"
+               classpathref="project.classpath"/>
+        <!-- Copy files from ${src} into ${build} -->
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="test" depends="compiletest" description="run the tests " >
+        <junit printsummary="yes" fork="yes" haltonfailure="yes">
+            <formatter type="plain"/>
+            <batchtest fork="true" todir="${test.report.dir}">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+            <classpath refid="project.classpath" />
+        </junit>
+    </target>
+
+    <target name="compiletest" depends="compile"
+            description="compile the tests " >
+        <javac debug="true"
+               srcdir="${test.dir}"
+               destdir="${build.dir}"
+               classpathref="project.classpath" />
+    </target>
+
+    <target name="dist" depends="compile" description="generate the distribution" >
+        <jar jarfile="${dist.dir}/${jarname}-${DSTAMP}.jar" basedir="${build.dir}"/>
+        <copy file="${dist.dir}/${jarname}-${DSTAMP}.jar" tofile="./${jarname}.jar" overwrite="true"/>
+    </target>
+
+    <target name="clean"
+            description="clean up" >
+        <delete dir="${build.dir}"/>
+    </target>
+</project>
