@@ -11,7 +11,7 @@ public interface TerminalService {
 
     public void createOrder();
     public void scan(String productCode);
-    public void removeItem(String productCode);
+    public void scan(String productCode, ScanAction action);
     public Order getOrder();
     public Double total();
     public void clear();

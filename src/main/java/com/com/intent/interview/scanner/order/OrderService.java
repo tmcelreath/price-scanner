@@ -11,7 +11,7 @@ public interface OrderService {
 
     public Order removeProduct(Order order, String productCode);
 
-    public Order total(Order order, String productCode);
+    public Order total(Order order);
 
     public Order completeOrder(Order order);
 }

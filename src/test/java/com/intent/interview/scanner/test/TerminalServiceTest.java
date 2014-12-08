@@ -6,6 +6,7 @@ import com.com.intent.interview.scanner.catalog.exception.InvalidPriceTierExcept
 import com.com.intent.interview.scanner.order.OrderService;
 import com.com.intent.interview.scanner.order.OrderServiceImpl;
 import com.com.intent.interview.scanner.order.model.Order;
+import com.com.intent.interview.scanner.terminal.ScanAction;
 import com.com.intent.interview.scanner.terminal.TerminalService;
 import com.com.intent.interview.scanner.terminal.TerminalServiceImpl;
 import com.com.intent.interview.scanner.catalog.exception.ProductNotFoundException;
@@ -195,7 +196,7 @@ public class TerminalServiceTest {
         terminal.createOrder();
         terminal.scan("A");
         assertEquals(new Double(2), terminal.total());
-        terminal.removeItem("A");
+        terminal.scan("A", ScanAction.REMOVE);
         assertEquals(new Double(0), terminal.total());
         assertEquals(terminal.getOrder().getContents().size(), 0);
         terminal.completeOrder();

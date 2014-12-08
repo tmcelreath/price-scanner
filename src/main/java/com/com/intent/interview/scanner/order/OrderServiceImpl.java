@@ -6,9 +6,7 @@ import com.com.intent.interview.scanner.catalog.exception.ProductNotFoundExcepti
 import com.com.intent.interview.scanner.catalog.model.PriceTier;
 import com.com.intent.interview.scanner.catalog.model.PriceTierType;
 import com.com.intent.interview.scanner.catalog.model.Product;
-import com.com.intent.interview.scanner.order.model.Order;
-import com.com.intent.interview.scanner.order.model.OrderRow;
-import com.com.intent.interview.scanner.order.model.OrderStatus;
+import com.com.intent.interview.scanner.order.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -25,8 +23,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public Order addProduct(Order order, String productCode) {
-        order.add(productCode);
-        total(order, productCode);
+        addOrderItem(productCode, order, OrderItemStatus.ADD);
         return order;
     }
 
@@ -41,7 +38,50 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     public Order removeProduct(Order order, String productCode) {
-        order.remove(productCode);
+        addOrderItem(productCode, order, OrderItemStatus.REMOVE);
+        return order;
+    }
+
+    private void addOrderItem(String productCode, Order order, OrderItemStatus status) {
+        if(OrderItemStatus.ADD.equals(status)) {
+            order.add(productCode);
+        } else if (OrderItemStatus.REMOVE.equals(status)) {
+            order.remove(productCode);
+        }
+        //total(order, productCode);
+    }
+
+    /
+    public Order total(Order order) {
+
+        order.getContents().clear();
+
+        // Apply the ADDs
+        order.getOrderItems().stream()
+                .filter(item -> OrderItemStatus.ADD.equals(item.getStatus()))
+                .forEach(item -> {
+                    if(order.getContents().containsKey(item.getProductCode())) {
+                        order.getContents().get(item.getProductCode()).increment();
+                    } else {
+                        OrderRow row = new OrderRow(item.getProductCode());
+                        order.getContents().put(item.getProductCode(), row);
+                    }
+                });
+
+        // Apply the REMOVES
+        order.getOrderItems().stream()
+                .filter(item -> OrderItemStatus.REMOVE.equals(item.getStatus()))
+                .forEach(item -> {
+                    if(order.getContents().containsKey(item.getProductCode())) {
+                        order.getContents().get(item.getProductCode()).decrement();
+                        if(order.getContents().get(item.getProductCode()).getQuantity()<1) {
+                            order.getContents().remove(item.getProductCode());
+                        }
+                    }
+                });
+
+        order.getContents().keySet().stream().forEach(productCode -> total(order, productCode));
+
         return order;
     }
 
@@ -53,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
      * @param productCode
      * @return
      */
-    public Order total(Order order, String productCode) {
+    private Order total(Order order, String productCode) {
         Map<String, OrderRow> contents = order.getContents();
         contents.values().stream()
                 .filter(row -> row.getProductCode().equals(productCode))
@@ -97,6 +137,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     public Order completeOrder(Order order) {
+        total(order);
         order.setOrderStatus(OrderStatus.COMPLETED);
         // TODO: Persist order. AS ABOVE.
         return order;

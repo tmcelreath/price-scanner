@@ -24,20 +24,25 @@ public class TerminalServiceImpl implements TerminalService {
         order = orderService.createOrder(terminalId);
     }
 
+
     /**
-     * Inserts a single instance of a product into the current order.
+     * Scans a single instance of a product into the current order, defaults to ScanAction.ADD
      * @param productCode
      */
     public void scan(String productCode) {
-        orderService.addProduct(order, productCode);
+       scan(productCode, ScanAction.ADD);
     }
 
+
     /**
-     * Removes a single instnace of a product from the current order.
+     * Scans a single instance of a product into the current order, along with an ADD/REMOVE flag
      * @param productCode
      */
-    public void removeItem(String productCode) {
-        orderService.removeProduct(order, productCode);
+    public void scan(String productCode, ScanAction action) {
+        if(ScanAction.ADD.equals(action)) {
+            orderService.addProduct(order, productCode);
+        } else if (ScanAction.REMOVE.equals(action))
+           orderService.removeProduct(order, productCode);
     }
 
     /**
@@ -55,7 +60,8 @@ public class TerminalServiceImpl implements TerminalService {
      * @return java.lang.Double
      */
     public Double total() {
-        return order.total();
+
+        return orderService.total(order).total();
     }
 
     /**
@@ -63,6 +69,7 @@ public class TerminalServiceImpl implements TerminalService {
      * @return
      */
     public Order completeOrder() {
+
         return orderService.completeOrder(order);
     }
 

@@ -2,10 +2,9 @@ package com.com.intent.interview.scanner.order.model;
 
 import com.com.intent.interview.scanner.order.model.OrderRow;
 
+import java.sql.Timestamp;
 import java.text.NumberFormat;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.*;
 
 public class Order {
 
@@ -33,8 +32,11 @@ public class Order {
      */
     private Map<String, OrderRow> contents;
 
+    private List<OrderItem> orderItems;
+
     public Order(String terminalId) {
-        clear();
+        orderItems = new LinkedList<OrderItem>();
+        contents = new HashMap<String, OrderRow>();
         this.terminalId = terminalId;
         this.orderStatus = orderStatus.OPEN;
     }
@@ -55,7 +57,18 @@ public class Order {
         return contents;
     }
 
+    public List<OrderItem> getOrderItems() {
+        return this.orderItems;
+    }
+
     public void add(String productCode) {
+
+        OrderItem item = new OrderItem();
+        item.setProductCode(productCode);
+        item.setStatus(OrderItemStatus.ADD);
+        item.setTimestamp(new Timestamp(System.currentTimeMillis()));
+        orderItems.add(item);
+
         if(contents.containsKey(productCode)) {
             contents.get(productCode).increment();
         } else {
@@ -64,6 +77,13 @@ public class Order {
     }
 
     public void remove(String productCode) {
+
+        OrderItem item = new OrderItem();
+        item.setProductCode(productCode);
+        item.setStatus(OrderItemStatus.REMOVE);
+        item.setTimestamp(new Timestamp(System.currentTimeMillis()));
+        orderItems.add(item);
+
         if(contents.containsKey(productCode)) {
             contents.get(productCode).decrement();
             if(contents.get(productCode).getQuantity()<1) {
@@ -73,7 +93,8 @@ public class Order {
     }
 
     public void clear() {
-        contents = new HashMap<String, OrderRow>();
+        orderItems.clear();
+        contents.clear();
     }
 
     public Double total() {
