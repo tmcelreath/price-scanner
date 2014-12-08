@@ -21,4 +21,6 @@ public interface CatalogService {
 
     public void deletePriceTier(String productCode, Integer quantity) throws ProductNotFoundException;
 
+    public double calculateSubtotal(String productCode, Integer quantity);
+
 }

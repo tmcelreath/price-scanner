@@ -3,8 +3,10 @@ package com.com.intent.interview.scanner.catalog;
 import com.com.intent.interview.scanner.catalog.exception.InvalidPriceTierException;
 import com.com.intent.interview.scanner.catalog.exception.ProductNotFoundException;
 import com.com.intent.interview.scanner.catalog.model.PriceTier;
+import com.com.intent.interview.scanner.catalog.model.PriceTierType;
 import com.com.intent.interview.scanner.catalog.model.Product;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -115,5 +117,70 @@ public class CatalogServiceImpl implements CatalogService {
             }
         }
     }
+
+    public double calculateSubtotal(String productCode, Integer quantity) {
+        double retval = 0;
+        try {
+
+            //row.setSubTotal(subtotal);
+            Product product = getProductByProductCode(productCode);
+            PriceTier tier = selectPriceTier(product.getPriceTiers(), quantity);
+            if (tier == null) {
+                retval = product.getBasePrice() * quantity;
+            } else {
+                if (PriceTierType.UNIT.equals(tier.getType())) {
+                    retval = calculateUnitTierPrice(quantity, product.getBasePrice(), tier.getQuantity(), tier.getPrice());
+                } else if (PriceTierType.THRESHOLD.equals(tier.getType())) {
+                    retval = tier.getPrice() * quantity;
+                }
+            }
+        } catch (ProductNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        return retval;
+    }
+
+
+    /**
+     * A UNIT price tier indicates that the tier price applies only to units of the
+     * exact tier quantity, and that any additional items will be charged at the product base
+     * price. For example, a six-pack of soda will be charged at the tier price, but a seventh
+     * can will be charged at the base, or non-tier, price.
+     *
+     * @param quantity
+     * @param basePrice
+     * @param unitSize
+     * @param unitPrice
+     * @return java.lang.Double
+     */
+    public Double calculateUnitTierPrice(Integer quantity,  Double basePrice, Integer unitSize, Double unitPrice) {
+        int leftovers = quantity % unitSize;
+        int units = (quantity - leftovers) / unitSize;
+        return (unitPrice * units) + (leftovers * basePrice);
+    }
+
+    /**
+     * Select the correct price tier (if any) from the product record for the given quantity.
+     * NOTE: This assumes that the product object has correctly sorted the PriceTiers by quantity (ascending)
+     *
+     * @param priceTiers java.util.List<PriceTier>
+     * @param quantity java.lang.Integer
+     * @return PriceTier
+     */
+    public PriceTier selectPriceTier(List<PriceTier> priceTiers, Integer quantity) {
+        PriceTier tier = null;
+        for(PriceTier pt: priceTiers) {
+            if(pt.getQuantity() <= quantity) {
+                tier = pt;
+            } else {
+                // Since the tiers are sorted, the given quantity is below
+                // the quantity value of the remaining tiers and we can exit.
+                // see: CatalogServiceImpl.insertPriceTier
+                break;
+            }
+        }
+        return tier;
+    }
+
 
 }
