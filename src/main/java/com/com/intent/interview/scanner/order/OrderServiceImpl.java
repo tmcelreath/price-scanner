@@ -51,7 +51,12 @@ public class OrderServiceImpl implements OrderService {
         //total(order, productCode);
     }
 
-    /
+    /**
+     * Recalculate the totals on all scanned items.
+     *
+     * @param order
+     * @return
+     */
     public Order total(Order order) {
 
         order.getContents().clear();

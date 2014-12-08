@@ -12,6 +12,12 @@ public class OrderItem {
     private String productCode;
     private Timestamp timestamp;
 
+    public OrderItem(String productCode, OrderItemStatus status) {
+        this.setStatus(status);
+        this.setProductCode(productCode);
+        this.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    }
+
     public OrderItemStatus getStatus() {
         return status;
     }

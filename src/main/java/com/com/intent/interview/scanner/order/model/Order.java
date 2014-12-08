@@ -62,34 +62,11 @@ public class Order {
     }
 
     public void add(String productCode) {
-
-        OrderItem item = new OrderItem();
-        item.setProductCode(productCode);
-        item.setStatus(OrderItemStatus.ADD);
-        item.setTimestamp(new Timestamp(System.currentTimeMillis()));
-        orderItems.add(item);
-
-        if(contents.containsKey(productCode)) {
-            contents.get(productCode).increment();
-        } else {
-            contents.put(productCode, new OrderRow(productCode));
-        }
+        orderItems.add(new OrderItem(productCode, OrderItemStatus.ADD));
     }
 
     public void remove(String productCode) {
-
-        OrderItem item = new OrderItem();
-        item.setProductCode(productCode);
-        item.setStatus(OrderItemStatus.REMOVE);
-        item.setTimestamp(new Timestamp(System.currentTimeMillis()));
-        orderItems.add(item);
-
-        if(contents.containsKey(productCode)) {
-            contents.get(productCode).decrement();
-            if(contents.get(productCode).getQuantity()<1) {
-                contents.remove(productCode);
-            }
-        }
+        orderItems.add(new OrderItem(productCode, OrderItemStatus.REMOVE));
     }
 
     public void clear() {
