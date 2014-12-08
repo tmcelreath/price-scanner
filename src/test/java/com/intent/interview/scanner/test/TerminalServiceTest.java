@@ -85,6 +85,19 @@ public class TerminalServiceTest {
         e_tier_2.setPrice(new Double(4));
         catalog.insertPriceTier(E.getProductCode(), e_tier_2);
 
+        Product F = new Product();
+        F.setProductCode("F");
+        F.setProductName("Product F");
+        F.setBasePrice(new Double(1));
+        catalog.insertProduct(F);
+
+        PriceTier f_tier_1 = new PriceTier();
+        f_tier_1.setType(PriceTierType.THRESHOLD);
+        f_tier_1.setQuantity(10);
+        f_tier_1.setPrice(new Double(.90));
+        f_tier_1.setPrice(new Double(.90));
+        catalog.insertPriceTier(F.getProductCode(), f_tier_1);
+
     }
 
     /**
@@ -143,6 +156,8 @@ public class TerminalServiceTest {
 
     }
 
+
+
     /**
      * Scan these items in this order EEEEEEEEEEE (11x); Verify that the cost is 22.50 after 5 scans,
      * 27 after 6 scans, 40.00 after 10 scans, and 44.00 after 11 scans.
@@ -171,6 +186,39 @@ public class TerminalServiceTest {
         assertEquals(new Double(44), order.total());
         order.print();
     }
+
+
+    /**
+     *  | Scanned items        | Total |
+     | F                    | 1.00  | <-- Same as G
+     | FFF                  | 3.00  | <-- Same as G
+     | FFFFFFFFFF (10 Fs)   | 9.00  | <-- Same as G
+     | FFFFFFFFFFFF (12 Fs) | 10.80 | <-- Different from G
+     */
+    @Test
+    public void testTotal5() {
+        terminal.createOrder();
+        terminal.scan("F");
+        assertEquals(new Double(1), terminal.total());
+        terminal.scan("F");
+        terminal.scan("F");
+        assertEquals(new Double(3), terminal.total());
+        terminal.scan("F");
+        terminal.scan("F");
+        terminal.scan("F");
+        terminal.scan("F");
+        terminal.scan("F");
+        terminal.scan("F");
+        terminal.scan("F");
+        assertEquals(new Double(9), terminal.total());
+        terminal.scan("F");
+        terminal.scan("F");
+        assertEquals(new Double(10.80), terminal.total());
+        terminal.getOrder().print();
+
+    }
+
+
 
     /**
      * Verify that the total is 0.0f after clearing the terminal
